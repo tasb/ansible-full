@@ -1,0 +1,36 @@
+---
+
+- name: Testing blocks
+  hosts: rasp
+  gather_facts: no
+  tasks:
+    - block:
+      - name: Print a message
+        ansible.builtin.debug:
+          msg: 'I execute normally'
+        changed_when: true
+        failed_when: true
+
+      - name: Force a failure
+        ansible.builtin.apt:
+          name: some_unknown_package
+          state: present
+      rescue:
+        - name: All is good if the first task failed
+          when: ansible_failed_task.name == 'Print a message'
+          ansible.builtin.debug:
+            msg: All good!
+
+        - name: All is not good if the second task failed
+          when: ansible_failed_task.name == 'Force a failure'
+          ansible.builtin.fail:
+            msg: It is still failed!!!
+
+      always:
+      - name: Always run this
+        ansible.builtin.debug:
+          msg: Always run this
+
+    - name: Print another message
+      ansible.builtin.debug:
+        msg: 'I execute after block'

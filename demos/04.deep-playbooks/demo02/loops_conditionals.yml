@@ -1,0 +1,35 @@
+- name: Example playbook with conditionals
+  hosts: all
+  gather_facts: true
+  vars:
+    packages:
+      - name: nginx
+        state: present
+        enable: false
+      - name: apache2
+        state: present
+        enable: false
+      - name: vim
+        state: absent
+        enable: true
+
+  tasks:
+    - name: Install packages
+      become: true
+      ansible.builtin.yum:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      loop: "{{ packages }}"
+      when: 
+        - ansible_facts['os_family'] == 'RedHat'
+        - item.enable == true
+
+    - name: Install packages
+      become: true
+      ansible.builtin.apt:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      loop: "{{ packages }}"
+      when: 
+        - ansible_facts['os_family'] == 'Debian'
+        - item.enable == true

@@ -1,0 +1,27 @@
+---
+- name: Uninstall Web Server
+  hosts: webserver
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Uninstall Nginx on Ubuntu
+      ansible.builtin.apt:
+        name: nginx
+        state: absent
+
+ 
+- name: Uninstall Database Server
+  hosts: db
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Uninstall PostgreSQL on Rocky Linux
+      ansible.builtin.yum:
+        name: postgresql-server
+        state: absent
+
+    - name: Remove PostgreSQL data directory
+      ansible.builtin.file:
+        path: /var/lib/pgsql
+        state: absent
+        force: yes

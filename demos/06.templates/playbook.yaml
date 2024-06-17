@@ -1,0 +1,37 @@
+---
+- name: Install and Configure Nginx
+  hosts: webserver
+  become: true
+  vars:
+    nginx_root_dir: /opt/nginx/html
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Create Nginx root directory
+      ansible.builtin.file:
+        path: "{{ nginx_root_dir }}"
+        state: directory
+
+    - name: Deploy nginx.conf
+      ansible.builtin.template:
+        src: templates/nginx.site.default.j2
+        dest: /etc/nginx/sites-enabled/default
+        owner: root
+        group: root
+        mode: '0777'
+      changed_when: true
+      notify: Restart Nginx
+
+    - name: Deploy index.html
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: "{{ nginx_root_dir }}/index.html"
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted

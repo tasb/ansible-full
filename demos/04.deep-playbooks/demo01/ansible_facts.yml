@@ -1,0 +1,7 @@
+- name: Copy and run builtin facts
+  gather_facts: no
+  hosts: all
+  tasks:
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: ansible_facts['os_family']

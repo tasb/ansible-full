@@ -1,0 +1,9 @@
+- name: Create directory
+  file:
+    path: /tmp/static-folder
+    state: directory
+
+- name: Create file
+  file:
+    path: /tmp/static-folder/file.txt
+    state: touch

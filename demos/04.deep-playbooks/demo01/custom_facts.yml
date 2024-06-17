@@ -1,0 +1,47 @@
+- name: Copy and run custom facts
+  gather_facts: no
+  hosts: all
+  vars:
+    static_fact_folder: /etc/ansible/facts.d
+    dynamic_fact_folder: /opt/ansible-facts
+  tasks:
+    - name: Create directory for static custom facts
+      become: true
+      ansible.builtin.file:
+        state: directory
+        recurse: true  
+        path: "{{ static_fact_folder }}"
+
+    - name: Create directory for dynamic custom facts
+      become: true
+      ansible.builtin.file:
+        state: directory
+        recurse: true  
+        path: "{{ dynamic_fact_folder }}"
+
+    - name: Copy custom static fact file
+      become: true
+      ansible.builtin.copy:
+        src: ./custom_facts/properties.fact
+        dest: "{{ static_fact_folder }}"
+
+    - name: Copy custom dynamic fact file
+      become: true
+      ansible.builtin.copy:
+        src: ./custom_facts/list_folders.fact
+        dest: "{{ dynamic_fact_folder }}"
+
+    - name: Ensure script is executable
+      become: true
+      ansible.builtin.file:
+        path: "{{ dynamic_fact_folder }}/list_folders.fact"
+        mode: '0755'
+
+    - name: Re-read facts after adding custom fact
+      ansible.builtin.setup:
+        filter: ansible_local
+        fact_path: "{{ dynamic_fact_folder }}"
+
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: ansible_facts

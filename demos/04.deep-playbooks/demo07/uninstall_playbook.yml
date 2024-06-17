@@ -1,0 +1,17 @@
+---
+- name: Stop Services and Uninstall Packages
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Stop services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+      loop: "{{ packages }}"
+
+    - name: Remove packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ packages }}"

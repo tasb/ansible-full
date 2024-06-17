@@ -1,0 +1,61 @@
+---
+- name: Configure Web Server
+  hosts: webserver
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Install Nginx on Ubuntu
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Ensure Nginx service is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+
+    - name: Perform Nginx smoke test
+      ansible.builtin.uri: 
+        url: "http://{{ inventory_hostname }}:80"
+        status_code: 200
+        timeout: 10
+        return_content: yes
+      register: nginx_smoke_test
+
+    - name: Print Nginx smoke test result
+      ansible.builtin.debug:
+        msg: "{{ nginx_smoke_test.content }}" 
+
+- name: Configure Database Server
+  hosts: db
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Install PostgreSQL on Rocky Linux
+      ansible.builtin.yum:
+        name: postgresql-server
+        state: present
+
+    - name: "Find out if PostgreSQL is initialized"
+      ansible.builtin.stat:
+        path: "/var/lib/pgsql/data/pg_hba.conf"
+      register: postgres_data
+
+    - name: "Initialize PostgreSQL"
+      shell: "postgresql-setup --initdb"
+      when: not postgres_data.stat.exists
+    
+    - name: Ensure PostgreSQL service is running
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+
+    - name: Perform PostgreSQL smoke test
+      ansible.builtin.shell: 'psql --version'
+      register: postgres_smoke_test
+      ignore_errors: yes
+
+    - name: Print PostgreSQL smoke test result
+      ansible.builtin.debug:
+        msg: "{{ postgres_smoke_test.stdout }}"
+

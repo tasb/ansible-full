@@ -1,0 +1,18 @@
+- name: Test Free Execution Strategy
+  hosts: all
+  gather_facts: false
+  strategy: free
+  tasks:
+    - name: Copy script to remote host
+      ansible.builtin.copy:
+        src: "script.sh"
+        dest: "/tmp/remote_script.sh"
+        mode: 0755
+
+    - name: Execute script on remote host
+      ansible.builtin.shell: "/tmp/remote_script.sh"
+      register: result
+
+    - name: Print result
+      ansible.builtin.debug:
+        var: result.stdout_lines

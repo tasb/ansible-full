@@ -1,0 +1,9 @@
+- name: Create directory
+  file:
+    path: "{{ path }}"
+    state: directory
+
+- name: Create file
+  file:
+    path: "{{ path }}/file.txt"
+    state: touch

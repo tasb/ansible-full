@@ -1,0 +1,17 @@
+- name: Using lookup
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Read services from file
+      set_fact:
+        services_list: "{{ lookup('file', './services.conf').splitlines() }}"
+
+    - name: Check service status
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+      loop: "{{ services_list }}"
+
+    - name: Ping hosts
+      ping:
+

@@ -1,0 +1,27 @@
+---
+- name: Installing Notepad ++
+  hosts: server
+  gather_facts: true
+  vars:
+    user_pass: !vault |
+                $ANSIBLE_VAULT;1.1;AES256
+                37666536333766313433383530366163326433373935383934356332666164653233333936336566
+                3635316433646564313836346361616535323036306335610a353633363231396431633734626330
+                36363363613064373333323962616532306461396336303634373534326438666364643038646561
+                6232303435326237320a613364346230626566616663663762616663303233336535356561643538
+                3035
+  tasks:
+  - name: Ensure user bob is present
+    ansible.windows.win_user:
+      name: NewRemoteUser
+      password: "{{ user_pass }}"
+      state: present
+      groups:
+        - Users
+
+  - name: Add a local and domain user to a local group
+    ansible.windows.win_group_membership:
+      name: Remote Desktop Users
+      members:
+        - NewRemoteUser
+      state: present

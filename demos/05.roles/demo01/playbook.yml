@@ -1,0 +1,26 @@
+- hosts: webserver
+  become: true
+  vars:
+    php_memory_limit: "128M"
+    php_max_execution_time: "90"
+    php_upload_max_filesize: "256M"
+    php_packages:
+      - php
+      - php-cli
+      - php-common
+  # vars_files:
+  #   - vars/main.yml
+  roles:
+    - role: geerlingguy.php
+      # vars:
+      #   php_memory_limit: "128M"
+      #   php_max_execution_time: "90"
+      #   php_upload_max_filesize: "256M"
+      #   php_packages:
+      #     - php
+      #     - php-cli
+      #     - php-common
+
+  tasks:
+    - name: Ping the server
+      ansible.builtin.ping:

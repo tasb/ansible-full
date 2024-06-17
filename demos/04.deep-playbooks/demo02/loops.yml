@@ -1,0 +1,25 @@
+- name: Example playbook with conditionals
+  hosts: webserver
+  gather_facts: false
+  vars:
+    state: present
+  tasks:
+    - name: Check packages state is {{ state }}
+      become: true
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: "{{ state }}"
+      loop:
+        - nginx
+        - vim
+        - git
+    - name: Count our fruit
+      ansible.builtin.debug:
+        msg: "{{ item }} with index {{ my_idx }}"
+      loop:
+        - apple
+        - banana
+        - pear
+      loop_control:
+        index_var: my_idx
+

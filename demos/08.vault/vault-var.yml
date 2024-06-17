@@ -1,0 +1,11 @@
+- name: Using vaults
+  hosts: rocky
+  gather_facts: no
+  vars:
+    bd_pass: 
+  tasks:
+    - name: Display secret password from the first vault
+      debug:
+        var: bd_pass
+
+

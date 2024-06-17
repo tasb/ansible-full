@@ -1,0 +1,27 @@
+---
+- name: Use import_tasks
+  gather_facts: no
+  hosts: all
+  vars:
+    path: /tmp/ansible-demo
+  tasks:
+    - name: Call a task from a file
+      ansible.builtin.import_tasks: ./task1.yml
+    - name: Call another task from a file
+      ansible.builtin.import_tasks: ./task2.yml
+
+- name: Use import_playbook
+  vars:
+    packages:
+      - redis
+      - vsftpd
+      - postfix
+  ansible.builtin.import_playbook: install_playbook.yml
+
+# - name: Use another import_playbook
+#   vars:
+#     packages:
+#       - redis
+#       - vsftpd
+#       - postfix
+#   ansible.builtin.import_playbook: uninstall_playbook.yml

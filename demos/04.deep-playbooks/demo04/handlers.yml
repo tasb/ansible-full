@@ -1,0 +1,40 @@
+---
+- name: Learn Handlers
+  hosts: webserver
+  gather_facts: no
+  tasks:
+    - name: Print a message
+      ansible.builtin.debug:
+        msg: 'I executed normally'
+      changed_when: true
+      notify:
+        - Handler 1
+        - Handler 2
+    
+    - meta: flush_handlers
+
+    - name: Task 003
+      ansible.builtin.command: "echo 'Task 003'"
+      when: "'003' in inventory_hostname"
+      notify: Handler 3
+
+    - name: Ping hosts
+      ansible.builtin.ping:
+
+  handlers:
+    - name: Handler 1
+      ansible.builtin.debug:
+        msg: "Handler 1"
+    
+    - name: Handler 2
+      ansible.builtin.debug:
+        msg: "Handler 2"
+
+    - name: Handler 3
+      ansible.builtin.debug:
+        msg: "Handler 3"
+
+    - name: Handler 4
+      ansible.builtin.debug:
+        msg: "Handler 4"
+      listen: Handler 2

@@ -1,0 +1,17 @@
+---
+- name: Install Packages and Start Services
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install package
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+
+    - name: Check if service is started
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+      loop: "{{ packages }}"

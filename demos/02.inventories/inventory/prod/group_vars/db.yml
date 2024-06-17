@@ -1,0 +1,3 @@
+db_port: 3306
+db_name: prod_db
+locale: en-US

@@ -1,0 +1,3 @@
+- src: https://github.com/tasb/ansible-role-tasb-nginx.git
+  version: main
+  name: tasb.nginx

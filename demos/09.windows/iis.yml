@@ -1,0 +1,19 @@
+---
+- name: Installing IIS
+  hosts: server
+  gather_facts: false
+  tasks:
+    - name: Install IIS Web-Server with sub features and management tools
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+        include_sub_features: true
+        include_management_tools: true
+      register: iis_install
+      notify: Reboot
+
+  handlers:
+    - name: Reboot when Web-Server feature requires it
+      ansible.windows.win_reboot:
+      when: iis_install.reboot_required
+      listen: Reboot
