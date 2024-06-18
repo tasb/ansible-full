@@ -2,245 +2,261 @@
 
 ## Contents
 
-- [Objective](#objective)
+- [Objectives](#objectives)
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
-  - [Step 1: Verify Ansible installation](#step-1-verify-ansible-installation)
-  - [Step 2: Run first ad-hoc command](#step-2-run-first-ad-hoc-command)
-  - [Step 3: Copy file locally](#step-3-copy-file-locally)
-  - [Step 4: Create SSH keys](#step-4-create-ssh-keys)
-  - [Step 5: Create inventory file](#step-5-create-inventory-file)
-  - [Step 6: Run ping command on multiple nodes](#step-6-run-ping-command-on-multiple-nodes)
-  - [Step 7: Run ping command using nodes group name](#step-7-run-ping-command-using-nodes-group-name)
-  - [Step 8: Copy file to multiple nodes](#step-8-copy-file-to-multiple-nodes)
-  - [Step 9: Run command on multiple nodes](#step-9-run-command-on-multiple-nodes)
+  - [Step 1: Create Azure VMs for Control Node](#step-1-create-azure-vms-for-control-node)
+  - [Step 2: Create Azure VMs for Managed Nodes](#step-2-create-azure-vms-for-managed-nodes)
+  - [Step 3: Install Ansible](#step-3-install-ansible)
+  - [Step 4: Configure access to managed nodes](#step-4-configure-access-to-managed-nodes)
+  - [Step 5: Verify python installation](#step-5-verify-python-installation)
+  - [Step 6: Create an inventory file for the managed node](#step-6-create-an-inventory-file-for-the-managed-node)
+  - [Step 7: Run an Ansible ad-hoc command on the managed node](#step-7-run-an-ansible-ad-hoc-command-on-the-managed-node)
+  - [Step 8: Copy file to managed nodes](#step-8-copy-file-to-managed-nodes)
+  - [Step 9: Run more commands on managed nodes](#step-9-run-more-commands-on-managed-nodes)
+  - [Step 10: Install a package on the managed node](#step-10-install-a-package-on-the-managed-node)
 - [Conclusion](#conclusion)
 
-## Objective
+## Objectives
 
-This lab is designed to provide hands-on experience with Ansible, focusing on fundamental tasks such as verifying installation, managing files, creating SSH keys, and executing basic commands on remote nodes.
+- Create Azure VMs for Control Node
+- Create Azure VMs for Managed Nodes
+- Install Ansible
+- Configure access to managed nodes
+- Verify python installation
+- Create an inventory file for the managed node
+- Run Ansible ad-hoc commands on the managed node
 
 ## Prerequisites
 
-- [ ] Ansible is installed on the control node
-- [ ] Python 3 (version 3.5 or later) is installed on the target nodes
-- [ ] Create a folder named `ansible-labs` in your home directory
-- [ ] Create a folder named `lab01` inside `ansible-labs`
-- [ ] Navigate to `lab01` folder
+- [ ] Have access to Azure Subscription
 
 ## Guide
 
-### Step 1: Verify Ansible installation
+### Step 1: Create Azure VMs for Control Node
 
-Access your control node and verify that Ansible is installed:
+For all resources created in this lab, you should use a prefix to identify the resources. This prefix should be unique within the Azure subscription.
+
+The prefix should be the first letter of your first name and full last name. For example, in my case `Tiago Bernardo`, the prefix would be `tbernardo`.
+
+On the following instructions, replace `<your-prefix>` with the prefix you defined.
+
+All resources in Azure needs to be created in a Resource Group. Navigate to the [Azure Portal](https://portal.azure.com/#create/Microsoft.ResourceGroup) and create a new Resource Group with the following configurations:
+
+- **Name**: `<your-prefix>-ansible-lab`
+- **Region**: `West Europe`
+
+Navigate to the [Azure Portal](https://portal.azure.com/#browse/Microsoft.Compute%2FVirtualMachines) and create 1 virtual machine with the following configurations:
+
+- **Resource Group**: `<your-prefix>-ansible-lab`
+- **Region**: `West Europe`
+- **Virtual Machine Name**: `<your-prefix>-control-node`
+- **Availability options**: `No infrastructure redundancy required`
+- **Image**: `Ubuntu Server 20.04 LTS`
+- **Size**: `Standard_D2s_v3`
+- **Username**: `azureuser`
+
+All the other configurations can be left as default.
+
+Click on `Review + create` and then `Create`.
+
+You should see a pop-up for you to download the private key. Download it and save it in a secure location.
+
+After the deployment is completed, you should see the public IP address of the virtual machine. Save it for future reference.
+
+### Step 2: Create Azure VMs for Managed Nodes
+
+Now you need to create the managed nodes.
+
+Please create 2 virtual machines using the same configurations as the control node, but using the following names: `<your-prefix>-server-1` and `<your-prefix>-server-2`.
+
+You need to go to the `Networking` tab and select the previously create virtual network. This will ensure that all virtual machines are in the same network.
+
+On the dropdown, you need to select the virtual network that starts with `<your-prefix>`.
+
+Again, you need to download the private key for each VM and save it in a secure location.
+
+After the deployment is completed, you should see the public IP address of the virtual machines. Save it for future reference.
+
+### Step 3: Install Ansible
+
+Now you need to install Ansible on the control node.
+
+First, SSH into the control node using the following command:
+
+```bash
+ssh -i <path-to-control-node-private-key> azureuser@<control-node-public-ip>
+```
+
+You should replace `<path-to-control-node-private-key>` with the path to the private key you downloaded and `<control-node-public-ip>` with the public IP address of the control node.
+
+You may get an error message saying that the permissions of the private key are too open. You can fix this by running the following command:
+
+```bash
+chmod 400 <path-to-control-node-private-key>
+```
+
+If you are in a Windows machine, you can use [PuTTY](https://www.putty.org/) to connect to the VM.
+
+After login into the control node, run the following commands to install Ansible:
+
+```bash
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+```
+
+After the installation is completed, you can check the version of Ansible by running the following command:
 
 ```bash
 ansible --version
 ```
 
-You should see output similar to the following:
+### Step 4: Configure access to managed nodes
+
+Now you need to configure access to the managed nodes.
+
+First, you need to copy the private key to the control node. You can use the following command to copy the private key to the control node:
 
 ```bash
-ansible 2.9.6
-  config file = /home/ansible/ansible.cfg
-  configured module search path = ['/home/ansible/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
-  ansible python module location = /home/ansible/.local/lib/python3.6/site-packages/ansible
-  executable location = /home/ansible/.local/bin/ansible
-  python version = 3.6.9 (default, Apr 18 2020, 01:56:04) [GCC 8.4.0]
+scp -i <path-to-control-node-private-key> <path-to-managed-node-private-key> azureuser@<control-node-public-ip>:~/.ssh/
 ```
 
-### Step 2: Run first ad-hoc command
+If you are in a Windows machine, you can use [WinSCP](https://winscp.net/eng/index.php) to copy the file. Or, on a more "traditional" way, you can copy+paste the content of the private key to a new file in the control node.
 
-Run the following command to ping localhost:
+You should replace `<path-to-managed-node-private-key>` with the path to the private key of the managed nodes.
+
+After copying the private key, you need to SSH into the control node and change the permissions of the private key:
 
 ```bash
-ansible localhost -m ping
+chmod 400 ~/.ssh/<managed-node-private-key>
 ```
 
-You should see output similar to the following:
+Let's test the connection to the managed nodes. Run the following command to SSH into the managed nodes:
 
 ```bash
-localhost | SUCCESS => {
+ssh -i ~/.ssh/<managed-node-private-key> azureuser@<managed-node-public-ip>
+```
+
+Repeat this process for all managed nodes.
+
+### Step 5: Verify python installation
+
+You need to have Python on the managed nodes, which is required by Ansible to run commands on the managed node.
+
+The installed version of Ubuntu 20.04 should come with Python 3 installed by default but let's confirm it.
+
+Use the same process on step 4 to SSH into the managed nodes and run the following command:
+
+```bash
+python3 --version
+```
+
+You should see the output similar to the following:
+
+```plaintext
+Python 3.8.10
+```
+
+### Step 6: Create an inventory file for the managed node
+
+Create a folder named `ansible/lab01` in the home directory of the `azureuser` user on the control node.
+
+Create a file named `inventory.yml` inside that folder with the following content:
+
+```yaml
+nodes:
+  hosts:
+    server1:
+      ansible_host: <server-1-ip>
+      ansible_user: azureuser
+      ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server1>
+    server2:
+      ansible_host: <server-2-ip>
+      ansible_user: azureuser
+      ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server2>
+```
+
+Please replace all the placeholders with the correct values.
+
+This inventory file contains the details of the managed nodes, which is required by Ansible to connect to the managed node.
+
+### Step 7: Run an Ansible ad-hoc command on the managed node
+
+Run the following command to test the connection between the control node and the managed node:
+
+```bash
+cd ~/ansible/lab01
+ansible -i inventory.yml nodes -m ping
+```
+
+You should see the output similar to the following:
+
+```plaintext
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+server2 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
     "changed": false,
     "ping": "pong"
 }
 ```
 
-This module is used to check if the target machine is reachable. It does not require Python on the remote system, just a reachable network connection and SSH. Because this module does not require Python, it is useful for checking if the remote host is able to be communicated with by Ansible.
+### Step 8: Copy file to managed nodes
 
-Look at command structure:
+To copy a file, you need to create a file first.
 
-```bash
-ansible <host-pattern> -m <module> [options]
-```
-
-- `host-pattern`: The pattern that defines which hosts will be affected by the command. This can be a single host, a group of hosts, or all hosts.
-- `module`: The module that will be executed on the remote host. This is the action that will be performed on the remote host.
-- `options`: The options that will be passed to the module. These are module-specific.
-
-### Step 3: Copy file locally
-
-First, let's create a file to copy:
+Run the following command to create a file named `hello.txt` in `/tmp` on the control node:
 
 ```bash
-echo "Hello World" > ~/hello.txt
+echo "Hello World" > /tmp/hello.txt
 ```
 
-Now run the following command to copy the file to `/tmp`:
+Then, run the following command to copy the previous created file to `/tmp` on all nodes:
 
 ```bash
-ansible localhost -m ansible.builtin.copy -a "src=~/hello.txt dest=/tmp/"
-```
-
-### Step 4: Create SSH keys
-
-For this step check on next image the infrastructure diagram to be used during all the labs:
-
-![Infrastructure Diagram](./images/lab01/image01.png)
-
-You are running this commands from `controler` node and your managed nodes are `servidor-0` and `servidor-1`.
-
-To generate new SSH keys, you can use  run the following command:
-
-```bash
-ansible localhost -m ansible.builtin.openssh_keypair -a "path=/home/vagrant/.ssh/ansible"
-```
-
-Now, copy the public key to the remote server `servidor-0`:
-
-```bash
-ssh-copy-id -i ~/.ssh/ansible.pub vagrant@servidor-0
-```
-
-You should get a prompt to enter the password for the `vagrant` user. Enter the password and press `Enter`.
-
-Repeat this step for the remote server `servidor-1`:
-
-```bash
-ssh-copy-id -i ~/.ssh/ansible.pub vagrant@servidor-1
-```
-
-Finally, to reference the key in Ansible, you need to create a file named `ansible.cfg` in `lab01` directory and add the following content:
-
-```bash
-[defaults]
-private_key_file = /home/vagrant/.ssh/ansible
-```
-
-### Step 5: Create inventory file
-
-Create a file named `inventory.ini` in `lab01` directory and add the following content:
-
-```ini
-[nodes]
-servidor-0
-servidor-1
-```
-
-### Step 6: Run ping command on multiple nodes
-
-Run the following command to ping all nodes:
-
-```bash
-ansible all -i inventory.ini -m ansible.builtin.ping
-```
-
-Since you're running for 2 nodes, you should see output similar to the following:
-
-```bash
-servidor-0 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-servidor-1 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-```
-
-To use the inventory file, you need to use the `-i` option. This option allows you to specify the path to the inventory file. If you don't specify this option, Ansible will use the default inventory file, which is located at `/etc/ansible/hosts`.
-
-You can use `ansible-inventory` command to list all hosts:
-
-```bash
-ansible-inventory -i inventory.ini --list
-```
-
-To avoid using the `-i` option every time you run a command, you can add the following content in `ansible.cfg` file in `lab01` directory:
-
-```bash
-inventory = inventory.ini
-```
-
-### Step 7: Run ping command using nodes group name
-
-Run the following command to ping all nodes:
-
-```bash
-ansible nodes -m ansible.builtin.ping
-```
-
-Since you're running for 2 nodes, you should see output similar to the following:
-
-```bash
-servidor-0 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-servidor-1 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-```
-
-On this case, the result is the same as the previous step, since we only have this group. On next labs, we will create more groups and you will see the difference.
-
-But you can also run the following command to ping one node:
-
-```bash
-ansible nodes -m ansible.builtin.ping -l servidor-0
-```
-
-### Step 8: Copy file to multiple nodes
-
-Run the following command to copy the previous created file to `/tmp` on all nodes:
-
-```bash
-ansible all -m ansible.builtin.copy -a "src=/tmp/hello.txt dest=/tmp/"
+ansible -i inventory.yml all -m ansible.builtin.copy -a "src=/tmp/hello.txt dest=/tmp/"
 ```
 
 You should see output similar to the following:
 
 ```bash
-servidor-0 | CHANGED => {
+server1 | CHANGED => {
     "changed": true,
-    "checksum": "e2fc714c4727ee9395f324cd2e7f331f",
-    "dest": "/tmp/hello.txt"
-    ...
-}
-servidor-1 | CHANGED => {
-    "changed": true,
-    "checksum": "e2fc714c4727ee9395f324cd2e7f331f",
-    "dest": "/tmp/hello.txt"
-    ...
+    "checksum": "d41d8cd98f00b204e9800998ecf8427e",
+    "dest": "/tmp/hello.txt",
+    "gid": 0,
+    "group": "root",
+    "md5sum": "d41d8cd98f00b204e9800998ecf8427e",
+    "mode": "0644",
+    "owner": "root",
+    "size": 0,
+    "src": "/home/lab-admin/.ansible/tmp/ansible-tmp-1648530733.3-1-1234/AnsiballZ_copy.py",
+    "state": "file",
+    "uid": 0
 }
 ```
 
-### Step 9: Run command on multiple nodes
+### Step 9: Run more commands on managed nodes
 
 Run the following command to list `/tmp` folder on all nodes:
 
 ```bash
-ansible all -m ansible.builtin.shell -a "ls /tmp"
+ansible -i inventory.yml all -m ansible.builtin.shell -a "ls /tmp"
 ```
 
 You should see output similar to the following:
 
 ```bash
-servidor-0 | CHANGED | rc=0 >>
-hello.txt
-...
-servidor-1 | CHANGED | rc=0 >>
+server1 | CHANGED | rc=0 >>
 hello.txt
 ...
 ```
@@ -248,20 +264,41 @@ hello.txt
 Let's check if the file was copied correctly:
 
 ```bash
-ansible all -m ansible.builtin.shell -a "cat /tmp/hello.txt"
+ansible -i inventory.yml all -m ansible.builtin.shell -a "cat /tmp/hello.txt"
 ```
 
 You should see output similar to the following:
 
 ```bash
-servidor-0 | CHANGED | rc=0 >>
-Hello World
-servidor-1 | CHANGED | rc=0 >>
+server1 | CHANGED | rc=0 >>
 Hello World
 ```
 
+### Step 10: Install a package on the managed node
+
+Next, let's run an ad-hoc command to install a package on the managed node.
+
+Run the following command:
+
+```bash
+ansible -i inventory.yml nodes -m apt -a "name=nginx state=present" --become
+```
+
+After install the package, you can run the following command to verify the status of the `nginx` service:
+
+```bash
+ansible -i inventory.yml nodes -m service -a "name=nginx state=started" --become
+```
+
+Now, let's use `curl` to check if the service is running. Run the following command:
+
+```bash
+curl http://<server-1-ip>
+curl http://<server-2-ip>
+```
+
+Please replace `<server-1-ip>` and `<server-2-ip>` with the public IP address of the managed nodes.
+
 ## Conclusion
 
-Congratulations! You've completed the lab exercise.
-
-These instructions will guide you through basic Ansible operations such as checking installation, copying files, creating and distributing SSH keys, managing inventory, and executing commands on remote nodes.
+In this lab you created all the necessary resources to run Ansible commands on managed nodes. You also tested the connection between the control node and the managed nodes and ran some ad-hoc commands.

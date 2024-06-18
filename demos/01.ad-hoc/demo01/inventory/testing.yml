@@ -7,7 +7,3 @@ nodes:
     tiberna-rasp-001:
     tiberna-rasp-002:
     tiberna-rasp-003:
-rocky:
-  hosts:
-    tiberna-rocky-001:
-    tiberna-rocky-002:

@@ -24,18 +24,10 @@ The slides used during the sessions are available on the `slides` folder.
 - [Error Handling](slides/08.ErrorHandling.pdf)
 - [Ansible Vault](slides/09.Vault.pdf)
 - [Ansible In Windows](slides/10.Windows.pdf)
-- [Best Practices](slides/11.BestPractices.pdf)
 
 ## Labs
 
 - [Lab 1 - Running Ad-Hoc Commands](labs/lab01.md)
-- [Lab 2 - Inventories](labs/lab02.md)
-- [Lab 3 - Playbooks](labs/lab03.md)
-- [Lab 4 - Deep Dive into Playbooks](labs/lab04.md)
-- [Lab 5 - Roles](labs/lab05.md)
-- [Lab 6 - Templates using Jinja2](labs/lab06.md)
-- [Lab 7 - Error handling and Ansible Vault](labs/lab07.md)
-- [Lab 8 - Create Ansible code from scratch](labs/lab08.md)
 
 ## Feedback
 
