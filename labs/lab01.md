@@ -299,6 +299,12 @@ curl http://<server-2-ip>
 
 Please replace `<server-1-ip>` and `<server-2-ip>` with the public IP address of the managed nodes.
 
+### Step 11: Stop the VMs
+
+At the end of all labs, you should stop the VMs to avoid unnecessary costs.
+
+Go to the Azure Portal and stop all VMs created in this lab.
+
 ## Conclusion
 
 In this lab you created all the necessary resources to run Ansible commands on managed nodes. You also tested the connection between the control node and the managed nodes and ran some ad-hoc commands.
