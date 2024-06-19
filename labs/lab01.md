@@ -188,7 +188,7 @@ Run the following command to test the connection between the control node and th
 
 ```bash
 cd ~/ansible/lab01
-ansible -i inventory.yml nodes -m ping
+ansible -i inventory.yml nodes -m ansible.builtin.ping
 ```
 
 You should see the output similar to the following:
@@ -281,13 +281,13 @@ Next, let's run an ad-hoc command to install a package on the managed node.
 Run the following command:
 
 ```bash
-ansible -i inventory.yml nodes -m apt -a "name=nginx state=present" --become
+ansible -i inventory.yml nodes -m ansible.builtin.apt -a "name=nginx state=present" --become
 ```
 
 After install the package, you can run the following command to verify the status of the `nginx` service:
 
 ```bash
-ansible -i inventory.yml nodes -m service -a "name=nginx state=started" --become
+ansible -i inventory.yml nodes -m ansible.builtin.service -a "name=nginx state=started" --become
 ```
 
 Now, let's use `curl` to check if the service is running. Run the following command:
