@@ -2,74 +2,45 @@
 
 ## Contents
 
-- [Objective](#objective)
-- [Prerequisites](#prerequisites)
-- [Guide](#guide)
-  - [Step 1: Create the Inventory File](#step-1-create-the-inventory-file)
-  - [Step 2: Test Inventory File](#step-2-test-inventory-file)
-  - [Step 3: Run a Simple Ansible Command](#step-3-run-a-simple-ansible-command)
-  - [Step 4: Create Group Variables](#step-4-create-group-variables)
-  - [Step 5: Test Group Variables](#step-5-test-group-variables)
-- [Conclusion](#conclusion)
+
 
 ## Objective
 
-Create an Ansible static inventory file in YAML format that categorizes two servers into webserver and db groups and define some example group variables for these groups.
+
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab02` inside `ansible-labs`
-- [ ] Navigate to `lab02` folder
-- [ ] Finish [Lab 01](lab02.md) to ensure you have access to managed nodes
-- [ ] Copy the `ansible.cfg` file from `lab01` folder to `lab02` folder
+- [ ] Navigate to `ansible/lab01` folder inside your home folder on control node
+- [ ] Finish [Lab 01](lab01.md) to ensure you have access to managed nodes
 
 ## Guide
 
-### Step 1: Create the Inventory File
-
-Create a folder named `inventory` inside `lab02` folder.
-
-Inside the `inventory` folder, create a file named `inventory.yml`.
-
-Add the following content to the file:
-
-```yaml
-webserver:
-  hosts:
-    servidor-0:
-      ansible_host: 10.0.3.100
-db:
-  hosts:
-    servidor-1:
-      ansible_host: 10.0.3.101
-```
-
-### Step 2: Test Inventory File
+### Step 1: Test Inventory File
 
 Test your inventory file using the `ansible-inventory` command:
 
 ```bash
-ansible-inventory -i inventory/inventory.yml --list
+ansible-inventory -i inventory.yml --list
 ```
 
 This will display your inventory in a JSON format, showing the groups, hosts, and variables.
 
-### Step 3: Run a Simple Ansible Command
+### Step 2: Run a Simple Ansible Command
 
 To test, run a simple Ansible command like ping:
 
 ```bash
-ansible -i inventory/inventory.yml all -m ping
+ansible -i inventory.yml all -m ansible.builtin.ping
 ```
 
 This will ping both servers in your inventory. You should see output similar to the following:
 
 ```bash
-servidor-0 | SUCCESS => {
+server-1 | SUCCESS => {
     "changed": false,
     "ping": "pong"
 }
-servidor-1 | SUCCESS => {
+server-2 | SUCCESS => {
     "changed": false,
     "ping": "pong"
 }
@@ -78,15 +49,27 @@ servidor-1 | SUCCESS => {
 Now let's try to run a command on a specific group. Run the following command:
 
 ```bash
-ansible -i inventory/inventory.yml webserver -m command -a "hostname"
+ansible -i inventory.yml nodes -m command -a "hostname"
 ```
 
 You should see output similar to the following:
 
 ```bash
-servidor-0 | CHANGED | rc=0 >>
-servidor-0
+server-1 | CHANGED | rc=0 >>
 ```
+
+### Step 3: Create new groups on inventory file
+
+Edit the `inventory.yml` file and add the following content at the end of the file:
+
+```yaml
+webserver:
+  hosts:
+    server1:
+db:
+  hosts:
+    server2:
+`
 
 Now let's try to run a command on the other group. Run the following command:
 
