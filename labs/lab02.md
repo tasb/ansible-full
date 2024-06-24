@@ -2,11 +2,25 @@
 
 ## Contents
 
-
+- [Objective](#objective)
+- [Prerequisites](#prerequisites)
+- [Guide](#guide)
+  - [Step 1: Test Inventory File](#step-1-test-inventory-file)
+  - [Step 2: Run a Simple Ansible Command](#step-2-run-a-simple-ansible-command)
+  - [Step 3: Create new groups on inventory file](#step-3-create-new-groups-on-inventory-file)
+  - [Step 4: Change IP address on inventory file](#step-4-change-ip-address-on-inventory-file)
+  - [Step 5: Create Group Variables](#step-5-create-group-variables)
+  - [Step 6: Test Group Variables](#step-6-test-group-variables)
+  - [Step 7: Create Host Variables](#step-7-create-host-variables)
+- [Conclusion](#conclusion)
 
 ## Objective
 
-
+- Create a static YAML inventory file
+- Add new groups to the inventory file
+- Change IP address on inventory file
+- Create group variables
+- Create host variables
 
 ## Prerequisites
 
@@ -17,10 +31,17 @@
 
 ### Step 1: Test Inventory File
 
+First, create an `inventory` directory and copy your inventory file to it:
+
+```bash
+mkdir inventory
+mv inventory.yml inventory/hosts.yml
+```
+
 Test your inventory file using the `ansible-inventory` command:
 
 ```bash
-ansible-inventory -i inventory.yml --list
+ansible-inventory -i inventory/hosts.yml --list
 ```
 
 This will display your inventory in a JSON format, showing the groups, hosts, and variables.
@@ -30,7 +51,7 @@ This will display your inventory in a JSON format, showing the groups, hosts, an
 To test, run a simple Ansible command like ping:
 
 ```bash
-ansible -i inventory.yml all -m ansible.builtin.ping
+ansible -i inventory/hosts.yml all -m ansible.builtin.ping
 ```
 
 This will ping both servers in your inventory. You should see output similar to the following:
@@ -49,7 +70,7 @@ server-2 | SUCCESS => {
 Now let's try to run a command on a specific group. Run the following command:
 
 ```bash
-ansible -i inventory.yml nodes -m command -a "hostname"
+ansible -i inventory/hosts.yml nodes -m ansible.builtin.command -a "hostname"
 ```
 
 You should see output similar to the following:
@@ -60,7 +81,7 @@ server-1 | CHANGED | rc=0 >>
 
 ### Step 3: Create new groups on inventory file
 
-Edit the `inventory.yml` file and add the following content at the end of the file:
+Edit the `hosts.yml` file and add the following content at the end of the file:
 
 ```yaml
 webserver:
@@ -69,76 +90,102 @@ webserver:
 db:
   hosts:
     server2:
-`
+```
 
 Now let's try to run a command on the other group. Run the following command:
 
 ```bash
-ansible -i inventory/inventory.yml db -m command -a "hostname"
+ansible -i inventory/hosts.yml db -m ansible.builtin.command -a "hostname"
 ```
 
 You should see output similar to the following:
 
 ```bash
-servidor-1 | CHANGED | rc=0 >>
-servidor-1
+server-2 | CHANGED | rc=0 >>
+server-2
 ```
 
 Finally let's try to run on a specific host. Run the following command:
 
 ```bash
-ansible -i inventory/inventory.yml servidor-0 -m command -a "hostname"
+ansible -i inventory/hosts.yml server1 -m ansible.builtin.command -a "hostname"
 ```
 
-### Step 4: Create Group Variables
+### Step 4: Change IP address on inventory file
+
+Since you've your servers on same Virtual Network as your Control Node, you can change the IP address on the inventory file to the private IP address of the servers.
+
+Edit the `hosts.yml` file and change the IP address of the servers to the private IP address of the servers.
+
+You can get the private IP address of the servers on Azure Portal.
+
+### Step 5: Create Group Variables
 
 Create one directory named `group_vars` inside `inventory` folder.
 
-Inside the `group_vars` folder, create two files named `webserver.yml` and `db.yml`.
-
-Add the following content to the `webserver.yml` file:
+Inside the `group_vars` folder, create a file named `all.yml` and add the following content:
 
 ```yaml
-http_port: 80
-max_clients: 200
+ansible_user: azureuser
 ```
 
-Add the following content to the `db.yml` file:
+On main `hosts.yml` file, remove `ansible_user: azureuser` from both servers.
 
-```yaml
-db_port: 3306
-db_name: mydatabase
-```
-
-### Step 5: Test Group Variables
+### Step 6: Test Group Variables
 
 Test your inventory file using the `ansible-inventory` command:
 
 ```bash
-ansible-inventory -i inventory/inventory.yml --list
+ansible-inventory -i inventory/hosts.yml --list
 ```
 
-Now run an ansible command to check the variables on `webserver` group:
+Now run an ansible command to check if you still can ping the servers:
 
 ```bash
-ansible -i inventory/inventory.yml webserver -m ansible.builtin.debug -a "var=http_port"
+ansible -i inventory/hosts.yml nodes -m ansible.builtin.ping
 ```
 
 You should see output similar to the following:
 
-```bash
-servidor-0 | SUCCESS => {
-    "http_port": 80
+```plaintext
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+server2 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
 }
 ```
 
-Now run an ansible command to check the variables on `db` group:
+### Step 7: Create Host Variables
+
+Create one directory named `host_vars` inside `inventory` folder.
+
+Create a file named `server1.yml` inside `host_vars` folder and add the following content:
+
+```yaml
+ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server1>
+```
+
+Create a file named `server2.yml` inside `host_vars` folder and add the following content:
+
+```yaml
+ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server2>
+```
+
+Let's test if the host variables are working. Run the following command:
 
 ```bash
-ansible -i inventory/inventory.yml db -m ansible.builtin.debug -a "var=db_port"
+ansible -i inventory/hosts.yml all -m ansible.builtin.ping
 ```
 
 ### Conclusion
 
-By completing this lab, you will have created a static YAML inventory file for Ansible, categorized two servers into different groups, and defined custom variables for each group.
-This setup is fundamental for organizing your managed nodes and configuring them based on their roles in your infrastructure.
+You've successfully created a static YAML inventory with group and host variables in Ansible.
