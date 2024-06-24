@@ -1,4 +1,4 @@
-# Lab 02 - Creating a Static YAML Inventory with Group Variables in Ansible
+# Lab 02 - YAML Inventory with Group and Host Variables in Ansible
 
 ## Contents
 
