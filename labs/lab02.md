@@ -180,6 +180,8 @@ Create a file named `server2.yml` inside `host_vars` folder and add the followin
 ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server2>
 ```
 
+You should delete those variables from the `hosts.yml` file.
+
 Let's test if the host variables are working. Run the following command:
 
 ```bash
