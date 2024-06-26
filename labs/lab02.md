@@ -142,7 +142,7 @@ ansible-inventory -i inventory/hosts.yml --list
 Now run an ansible command to check if you still can ping the servers:
 
 ```bash
-ansible -i inventory/hosts.yml nodes -m ansible.builtin.ping
+ansible -i inventory/hosts.yml all -m ansible.builtin.ping
 ```
 
 You should see output similar to the following:
