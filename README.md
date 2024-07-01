@@ -29,6 +29,7 @@ The slides used during the sessions are available on the `slides` folder.
 
 - [Lab 1 - Running Ad-Hoc Commands](labs/lab01.md)
 - [Lab 2 - YAML Inventory with Group and Host Variables in Ansible](labs/lab02.md)
+- [Lab 3 - Playbooks](labs/lab03.md)
 
 ## Feedback
 

@@ -54,6 +54,10 @@ Add the following content to the file:
   hosts: webserver
   become: true
   tasks:
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 86400
     - name: Install Apache
       ansible.builtin.apt:
         name: apache2
