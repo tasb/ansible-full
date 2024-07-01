@@ -35,7 +35,7 @@ Since we've installed nginx on the managed nodes, we need to remove it before in
 Run the following command to remove nginx from the managed nodes:
 
 ```bash
-ansible -i inventory/hosts.yml all -m ansible.builtin.apt -a "name=nginx state=absent" --become
+ansible -i inventory/hosts.yml all -m ansible.builtin.service -a "name=nginx state=stopped" --become
 ```
 
 Check the argument `state=absent` to remove the package. With Ansible you should always specify your desired state.
