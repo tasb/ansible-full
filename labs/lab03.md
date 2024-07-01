@@ -144,7 +144,7 @@ Add the following content to the file after the last task:
 ```yaml
     - name: Copy index.html
       ansible.builtin.copy:
-        src: index.html
+        src: static/index.html
         dest: /var/www/html/index.html
 ```
 
