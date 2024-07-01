@@ -2,7 +2,7 @@
 
 ## Contents
 
-- [Objectives](#objectives)
+- [Goals](#goals)
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
   - [Step 1: Create Azure VMs for Control Node](#step-1-create-azure-vms-for-control-node)
@@ -17,7 +17,7 @@
   - [Step 10: Install a package on the managed node](#step-10-install-a-package-on-the-managed-node)
 - [Conclusion](#conclusion)
 
-## Objectives
+## Goals
 
 - Create Azure VMs for Control Node
 - Create Azure VMs for Managed Nodes
@@ -74,9 +74,11 @@ You need to go to the `Networking` tab and select the previously create virtual 
 
 On the dropdown, you need to select the virtual network that starts with `<your-prefix>`.
 
+You should remove the public IP address from the managed nodes. You should only have a public IP address on the control node.
+
 Again, you need to download the private key for each VM and save it in a secure location.
 
-After the deployment is completed, you should see the public IP address of the virtual machines. Save it for future reference.
+After the deployment is completed, you should keep the private IP address of the virtual machines. Save it for future reference.
 
 ### Step 3: Install Ansible
 
@@ -136,7 +138,7 @@ chmod 400 ~/.ssh/<managed-node-private-key>
 Let's test the connection to the managed nodes. Run the following command to SSH into the managed nodes:
 
 ```bash
-ssh -i ~/.ssh/<managed-node-private-key> azureuser@<managed-node-public-ip>
+ssh -i ~/.ssh/<managed-node-private-key> azureuser@<managed-node-private-ip>
 ```
 
 Repeat this process for all managed nodes.
@@ -161,7 +163,7 @@ Python 3.8.10
 
 ### Step 6: Create an inventory file for the managed node
 
-Create a folder named `ansible/lab01` in the home directory of the `azureuser` user on the control node.
+Create a folder named `ansible` in the home directory of the `azureuser` user on the control node.
 
 Create a file named `inventory.yml` inside that folder with the following content:
 
@@ -169,11 +171,11 @@ Create a file named `inventory.yml` inside that folder with the following conten
 nodes:
   hosts:
     server1:
-      ansible_host: <server-1-ip>
+      ansible_host: <server-1-private-ip>
       ansible_user: azureuser
       ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server1>
     server2:
-      ansible_host: <server-2-ip>
+      ansible_host: <server-2-private-ip>
       ansible_user: azureuser
       ansible_ssh_private_key_file: /home/azureuser/.ssh/<private-key-server2>
 ```
@@ -187,7 +189,7 @@ This inventory file contains the details of the managed nodes, which is required
 Run the following command to test the connection between the control node and the managed node:
 
 ```bash
-cd ~/ansible/lab01
+cd ~/ansible/
 ansible -i inventory.yml nodes -m ansible.builtin.ping
 ```
 
@@ -293,11 +295,11 @@ ansible -i inventory.yml nodes -m ansible.builtin.service -a "name=nginx state=s
 Now, let's use `curl` to check if the service is running. Run the following command:
 
 ```bash
-curl http://<server-1-ip>
-curl http://<server-2-ip>
+curl http://<server-1-private-ip>
+curl http://<server-2-private-ip>
 ```
 
-Please replace `<server-1-ip>` and `<server-2-ip>` with the public IP address of the managed nodes.
+Please replace `<server-1-private-ip>` and `<server-2-private-ip>` with the private IP address of the managed nodes.
 
 ### Step 11: Stop the VMs
 

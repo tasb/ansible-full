@@ -1,7 +1,6 @@
 ---
 - name: Install and Test Nginx
   hosts: webserver
-  gather_facts: false
   become: true
   vars:
     nginx_version: "1.18.*"  # Specify the Nginx version here
@@ -9,9 +8,9 @@
   tasks:
     - name: Update and upgrade apt packages
       ansible.builtin.apt:
-        update_cache: yes
-        cache_valid_time: 86400 #One day
-    
+        update_cache: true
+        cache_valid_time: 86400
+
     - name: Install Nginx
       ansible.builtin.apt:
         name: "nginx={{ nginx_version }}"
@@ -21,7 +20,7 @@
       ansible.builtin.service:
         name: nginx
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Check if nginx is delivering the default page
       ansible.builtin.uri:

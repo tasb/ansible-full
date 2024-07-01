@@ -2,7 +2,7 @@
 
 ## Contents
 
-- [Objective](#objective)
+- [Goals](#goals)
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
   - [Step 1: Test Inventory File](#step-1-test-inventory-file)
@@ -14,7 +14,7 @@
   - [Step 7: Create Host Variables](#step-7-create-host-variables)
 - [Conclusion](#conclusion)
 
-## Objective
+## Goals
 
 - Create a static YAML inventory file
 - Add new groups to the inventory file
@@ -24,7 +24,7 @@
 
 ## Prerequisites
 
-- [ ] Navigate to `ansible/lab01` folder inside your home folder on control node
+- [ ] Navigate to `ansible` folder inside your home folder on control node
 - [ ] Finish [Lab 01](lab01.md) to ensure you have access to managed nodes
 
 ## Guide

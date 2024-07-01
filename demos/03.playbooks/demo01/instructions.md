@@ -3,49 +3,19 @@
 ## Dry-run playbook for dev env
 
 ```bash
-ansible-playbook -i inventory/dev  --check  webserver.yml
+ansible-playbook -i inventory/hosts.yml  --check  webserver.yml
 ```
 
 ## Run playbook on dev env
 
 ```bash
-ansible-playbook -i inventory/dev  webserver.yml
+ansible-playbook -i inventory  webserver.yml
 ```
 
 ## Re-run playbook on dev env
 
 ```bash
-ansible-playbook -i inventory/dev  webserver.yml
-```
-
-## Dry-run playbook for prod env
-
-```bash
-ansible-playbook -i inventory/prod  --check  webserver.yml
-```
-
-## Run playbook on prod env
-
-```bash
-ansible-playbook -i inventory/prod  webserver.yml
-```
-
-## Re-run playbook on prod env
-
-```bash
-ansible-playbook -i inventory/prod  webserver.yml
-```
-
-## Display inventory in graph for all envs
-
-```bash
-ansible-inventory -i inventory --graph
-```
-
-## Display inventory in list for all envs
-
-```bash
-ansible-inventory -i inventory --list
+ansible-playbook -i inventory  webserver.yml
 ```
 
 ## Run cleanup playbook on all envs

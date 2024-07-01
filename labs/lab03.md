@@ -2,10 +2,10 @@
 
 ## Contents
 
-- [Objective](#objective)
+- [Goals](#goals)
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
-  - [Step 1: Add connection details on inventory](#step-1-add-connection-details-on-inventory)
+  - [Step 1: Prepare the servers](#step-1-prepare-the-servers)
   - [Step 2: Create the Playbook](#step-2-create-the-playbook)
   - [Step 3: Run the Playbook](#step-3-run-the-playbook)
   - [Step 4: Test the Web Server](#step-4-test-the-web-server)
@@ -13,55 +13,38 @@
   - [Step 6: Add a smoke test](#step-6-add-a-smoke-test)
 - [Conclusion](#conclusion)
 
-## Objective
+## Goals
 
-Create an Ansible playbook that installs and configures a web server on a managed node.
+- Author your first Ansible playbook
+- Run the playbook to install and configure a web server
+- Test the web server
+- Change the homepage
+- Add a smoke test
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab03` inside `ansible-labs`
-- [ ] Navigate to `lab03` folder
-- [ ] Copy the `inventory` folder from `lab02` to `lab03`
+- [ ] Navigate to `ansible` folder inside your home folder on control node
+- [ ] Finish [Lab 02](lab02.md) to ensure you have access to managed nodes
 
 ## Guide
 
-### Step 1: Add connection details on inventory
+### Step 1: Prepare the servers
 
-Create a file called `all.yml` inside `inventory/group_vars` folder.
+Since we've installed nginx on the managed nodes, we need to remove it before installing Apache.
 
-Add the following content to the file:
-
-```yaml
-ansible_private_key_file: /home/vagrant/.ssh/ansible
-ansible_user: vagrant
-```
-
-With this, we are telling Ansible to use the private key file `/home/vagrant/.ssh/ansible` to connect to the managed nodes and to use the user `vagrant`.
-
-This configuration replace the need to use `ansible.cfg` file.
-
-Let's test the connection:
+Run the following command to remove nginx from the managed nodes:
 
 ```bash
-ansible -i inventory all -m ping
+ansible -i inventory/hosts.yml all -m ansible.builtin.apt -a "name=nginx state=absent" --become
 ```
 
-You should see output similar to the following:
+Check the argument `state=absent` to remove the package. With Ansible you should always specify your desired state.
 
-```bash
-servidor-0 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-servidor-1 | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-```
+Once you've removed nginx, you can proceed to the next step.
 
 ### Step 2: Create the Playbook
 
-Create a file named `webserver.yml` inside `lab03` folder.
+Create a file named `webserver.yml` inside `ansible` folder.
 
 Add the following content to the file:
 
@@ -72,12 +55,12 @@ Add the following content to the file:
   become: true
   tasks:
     - name: Install Apache
-      ansible.builtin.yum:
-        name: httpd
+      ansible.builtin.apt:
+        name: apache2
         state: latest
     - name: Start Apache
       ansible.builtin.service:
-        name: httpd
+        name: apache2
         state: started
 ```
 
@@ -93,7 +76,7 @@ On this playbook, we are:
 Run the playbook using the `ansible-playbook` command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml webserver.yml
+ansible-playbook -i inventory/hosts.yml webserver.yml
 ```
 
 This will run the playbook on the hosts in the `webserver` group.
@@ -104,16 +87,16 @@ You should see output similar to the following:
 PLAY [Install and configure web server] ****************************************************
 
 TASK [Gathering Facts] *********************************************************************
-ok: [servidor-0]
+ok: [server-1]
 
 TASK [Install Apache] **********************************************************************
-changed: [servidor-0]
+changed: [server-1]
 
 TASK [Start Apache] ************************************************************************
-changed: [servidor-0]
+changed: [server-1]
 
 PLAY RECAP *********************************************************************************
-servidor-0          : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+server-1          : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
 ### Step 4: Test the Web Server
@@ -121,8 +104,10 @@ servidor-0          : ok=3    changed=2    unreachable=0    failed=0    skipped=
 Run the following command to test the web server:
 
 ```bash
-curl http://servidor-0.seg-social.virt
+curl http://<server-1-private-ip>
 ```
+
+Please replace `<server-1-private-ip>` with the private IP address of your managed node.
 
 You should get an HTML page as output.
 
@@ -130,7 +115,9 @@ You can also open the URL on your browser to see the page.
 
 ### Step 5: Change homepage
 
-First, let's create a new file named `index.html` inside `lab03` folder.
+First, create a folder named `static` inside the `ansible` folder.
+
+Then, let's create a new file named `index.html` inside `static` folder.
 
 Add the following content to the file:
 
@@ -164,7 +151,7 @@ Pay attention to the indentation. The task should be at the same level as the `S
 Run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml webserver.yml
+ansible-playbook -i inventory/hosts.yml webserver.yml
 ```
 
 You should see output similar to the following:
@@ -188,7 +175,13 @@ PLAY RECAP *********************************************************************
 servidor-0          : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
-Now navigate to the URL <http://servidor-0.seg-social.virt> and you should see the new page.
+Now navigate run the following command to test the web server:
+
+```bash
+curl http://<server-1-private-ip>
+```
+
+You should see the new content on the page.
 
 ### Step 6: Add a smoke test
 
@@ -199,7 +192,7 @@ Add the following content to the `webserver.yml` file after the `Copy index.html
 ```yaml
     - name: Run smoke test
       ansible.builtin.uri:
-        url: http://servidor-0.seg-social.virt
+        url: http://localhost
         return_content: yes
       register: result
     - name: Debug smoke test
@@ -210,8 +203,10 @@ Add the following content to the `webserver.yml` file after the `Copy index.html
 Let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml webserver.yml
+ansible-playbook -i inventory/hosts.yml webserver.yml
 ```
+
+Pay attention that the URL you are testing is `http://localhost` because the playbook is running on the managed node.
 
 The playbook file context at the end should look like this:
 
@@ -235,7 +230,7 @@ The playbook file context at the end should look like this:
         dest: /var/www/html/index.html
     - name: Run smoke test
       ansible.builtin.uri:
-        url: http://servidor-0.seg-social.virt
+        url: http://localhost
         return_content: yes
       register: result
     - name: Debug smoke test
@@ -245,4 +240,6 @@ The playbook file context at the end should look like this:
 
 ## Conclusion
 
-In this lab, we created our first playbook to install and configure a web server. You also learned how to run a playbook and how to update it to add new tasks.
+Congratulations! You've created and run your first Ansible playbook.
+
+With this playbook you've learned how to install and configure a web server on a managed node, change the homepage, and run a smoke test.
