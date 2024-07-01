@@ -38,9 +38,7 @@ Run the following command to remove nginx from the managed nodes:
 ansible -i inventory/hosts.yml all -m ansible.builtin.service -a "name=nginx state=stopped" --become
 ```
 
-Check the argument `state=absent` to remove the package. With Ansible you should always specify your desired state.
-
-Once you've removed nginx, you can proceed to the next step.
+Once you've stop nginx service, you can proceed to the next step.
 
 ### Step 2: Create the Playbook
 
