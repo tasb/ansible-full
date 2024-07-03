@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-- [Objectives](#objectives)
+- [Goals](#goals)
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
   - [Step 1: Install Redis](#step-1-install-redis)
@@ -13,7 +13,7 @@
   - [Step 6: Run the full playbook](#step-6-run-the-full-playbook)
 - [Conclusion](#conclusion)
 
-## Objectives
+## Goals
 
 - Install and configure a Apache web server
 - Install and configure a PostgreSQL database server
@@ -21,16 +21,14 @@
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab04` inside `ansible-labs`
-- [ ] Navigate to `lab04` folder
-- [ ] Copy the `inventory` folder from `lab03` to `lab04`
-  - Command: `cp -r ../lab03/inventory ./inventory`
+- [ ] Navigate to `ansible` folder inside your home folder on control node
+- [ ] Finish [Lab 03](lab03.md) to ensure you have access to managed nodes
 
 ## Guide
 
 ### Step 1: Install Redis
 
-Create a file named `full_playbook.yml` inside `lab04` folder.
+Create a file named `full_playbook.yml` inside `ansible` folder.
 
 Add the following content to the file:
 
@@ -88,7 +86,7 @@ On play definition we're including the tag `redis` to the play. This will allow 
 Now let's run the playbook:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 You should see an error on the output when trying to run `Test Redis` task.
@@ -111,7 +109,7 @@ Pay attention to the indentation. This task should be at the same level as the o
 Now let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 Even forcing the handler to run, you'll get an error on the `Test Redis` task.
@@ -132,7 +130,19 @@ Edit the file `full_playbook.yml` and change the `Install Redis` task to the fol
   changed_when: redis_installed.rc == 0
   notify:
     - Start Redis
+
+- name: Install Redis
+  ansible.builtin.apt:
+    name: redis-server
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+  register: redis_installed
+  changed_when: redis_installed.rc == 0
+  notify:
+    - Start Redis
 ```
+
+Pay attention to the indentation. The `changed_when` option should be at the same level as the `register` option.
 
 On this task, you are using the `changed_when` option to change the result of the task to `Changed` when the `rc` attribute of the `redis_installed` variable is `0`.
 
@@ -141,17 +151,17 @@ The `rc` attribute is the return code of the task. When the task runs without an
 Let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 Now everything should run fine and you get an output for the `Test Redis` task similar to the following:
 
 ```bash
 TASK [Print Redis ping] ***************************
-ok: [servidor-0] => {
+ok: [server-0] => {
     "msg": "PONG"
 }
-ok: [servidor-1] => {
+ok: [server-1] => {
     "msg": "PONG"
 }
 ```
@@ -189,7 +199,7 @@ So you need to create the handler. Edit the file `full_playbook.yml` and add the
 Now let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 Take a look to the output of this run and check how the task run and at the end you see the handler running.
@@ -197,7 +207,7 @@ Take a look to the output of this run and check how the task run and at the end 
 Now let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 As expected, everything run fine since you're using idempotent tasks. If not, you'll get an error on the `Configure Redis` task because the regular expression will not match.
@@ -206,10 +216,10 @@ But you may notice a difference on the output of the `Print Redis ping` task:
 
 ```bash
 TASK [Print Redis ping] **************************
-ok: [servidor-0] => {
+ok: [server-1] => {
     "msg": "NOAUTH Authentication required."
 }
-ok: [servidor-1] => {
+ok: [server-2] => {
     "msg": "NOAUTH Authentication required."
 }
 ```
@@ -251,17 +261,17 @@ Finally, to make use of the variable, edit the `Configure Redis` task and change
 Let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 Now you should see the output of the `Print Redis ping` task similar to the following:
 
 ```bash
 TASK [Print Redis ping] ***************************
-ok: [servidor-0] => {
+ok: [server-1] => {
     "msg": "PONG"
 }
-ok: [servidor-1] => {
+ok: [server-2] => {
     "msg": "PONG"
 }
 ```
@@ -360,7 +370,7 @@ Check the line `become_user: postgres`. This is needed because the `postgres` us
 Now let's run the playbook:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml --tags postgresql
+ansible-playbook -i inventory/hosts.yml full_playbook.yml --tags postgresql
 ```
 
 On the command above, you're running the playbook and filtering the tasks by the `postgresql` tag.
@@ -370,7 +380,7 @@ You should run everything without any error.
 Now let's run the playbook again:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml --tags postgresql
+ansible-playbook -i inventory/hosts.yml full_playbook.yml --tags postgresql
 ```
 
 And confirm that only the testing tasks returns a `Changed` result.
@@ -380,18 +390,6 @@ And confirm that only the testing tasks returns a `Changed` result.
 Now you need to add to this playbook the tasks to install and configure Apache.
 
 Those tasks already exists on the `webserver.yml` playbook from the previous lab.
-
-So start to copy the file `webserver.yml` from `lab03` to `lab04`:
-
-```bash
-cp ../lab03/webserver.yml .
-```
-
-You need to copy the file `index.html` from `lab03` to `lab04`:
-
-```bash
-cp ../lab03/index.html .
-```
 
 Then, edit the file `full_playbook.yml` and use the `import_playbook` module to import the `webserver.yml` playbook:
 
@@ -407,7 +405,7 @@ This should be added after the last play.
 Let's run the playbook:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml --tags webserver
+ansible-playbook -i inventory/hosts.yml full_playbook.yml --tags webserver
 ```
 
 You should see the tasks from the `webserver.yml` playbook running.
@@ -436,17 +434,19 @@ After you added all the tasks, your `full_playbook.yml` should look like this:
       notify:
         - Start Redis
 
-    - name: Print
-      ansible.builtin.debug:
-        msg: "{{ redis_installed }}"
-
     - name: Install Redis
       ansible.builtin.apt:
         name: redis-server
         state: present
       when: ansible_facts['os_family'] == "Debian"
+      register: redis_installed
+      changed_when: redis_installed.rc == 0
       notify:
         - Start Redis
+
+    - name: Print
+      ansible.builtin.debug:
+        msg: "{{ redis_installed }}"
 
     - meta: flush_handlers
 
@@ -526,7 +526,7 @@ After you added all the tasks, your `full_playbook.yml` should look like this:
 Now let's run the full playbook without setting any tag.
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory/hosts.yml full_playbook.yml
 ```
 
 You should see all the tasks running and not making any change on the server unless on testing tasks.
