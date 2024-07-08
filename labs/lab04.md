@@ -127,7 +127,7 @@ Edit the file `full_playbook.yml` and change the `Install Redis` task to the fol
     state: present
   when: ansible_facts['os_family'] == "RedHat"
   register: redis_installed
-  changed_when: redis_installed.rc == 0
+  changed_when: true
   notify:
     - Start Redis
 
@@ -137,7 +137,7 @@ Edit the file `full_playbook.yml` and change the `Install Redis` task to the fol
     state: present
   when: ansible_facts['os_family'] == "Debian"
   register: redis_installed
-  changed_when: redis_installed.rc == 0
+  changed_when: true
   notify:
     - Start Redis
 ```

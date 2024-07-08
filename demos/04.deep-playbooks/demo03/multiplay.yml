@@ -32,7 +32,7 @@
   gather_facts: false
   tasks:
     - name: Install PostgreSQL on Rocky Linux
-      ansible.builtin.yum:
+      ansible.builtin.apt:
         name: postgresql-server
         state: present
 
