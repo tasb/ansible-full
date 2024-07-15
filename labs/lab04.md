@@ -283,6 +283,16 @@ Having the password on the playbook is not a good practice. We're doing this way
 
 Now let's install PostgreSQL.
 
+Before, you need to change a configuration on your inventory file.
+
+Edit the file named `inventory/group_vars/all.yml` and add the following content at the end of the file:
+
+```yaml
+ansible_ssh_pipelining: true
+```
+
+This property is needed because you need to run the `psql` command as the `postgres` user and this Ubuntu has a configuration that doesn't allow this by default.
+
 Edit the file `full_playbook.yml` and add a new play after the `Install and configure Redis` play:
 
 ```yaml
@@ -308,7 +318,7 @@ Now let's add the task to install PostgreSQL:
   tasks:
     - name: Install PostgreSQL
       ansible.builtin.package:
-        name: postgresql-server
+        name: postgresql
         state: present
 ```
 
@@ -317,25 +327,6 @@ Check that we're using the `ansible.builtin.package` module to install the `post
 This module can be used on both RedHat and Debian based systems and uses the correct package manager for each system.
 
 You can check more details about this module on the [Ansible documentation](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html).
-
-Then, you need to add the task to initialize the database:
-
-```yaml
-    - name: "Find out if PostgreSQL is initialized"
-      ansible.builtin.stat:
-        path: "/var/lib/pgsql/data/pg_hba.conf"
-      register: postgres_data
-    
-    - name: "Initialize PostgreSQL"
-      ansible.builtin.shell: "postgresql-setup --initdb"
-      when: not postgres_data.stat.exists
-```
-
-These tasks will check if the file `/var/lib/pgsql/data/pg_hba.conf` exists and if not, will initialize the database.
-
-Pay attention to the `when` condition on the second task. This task will only run if the file doesn't exist.
-
-When adding this to the file pay attention to the indentation. These tasks should be at the same level as the `Install PostgreSQL` task.
 
 Then, you need to add the task to start the service:
 
@@ -491,15 +482,6 @@ After you added all the tasks, your `full_playbook.yml` should look like this:
       ansible.builtin.package:
         name: postgresql-server
         state: present
-
-    - name: "Find out if PostgreSQL is initialized"
-      ansible.builtin.stat:
-        path: "/var/lib/pgsql/data/pg_hba.conf"
-      register: postgres_data
-
-    - name: "Initialize PostgreSQL"
-      shell: "postgresql-setup --initdb"
-      when: not postgres_data.stat.exists
 
     - name: Start PostgreSQL
       service:
