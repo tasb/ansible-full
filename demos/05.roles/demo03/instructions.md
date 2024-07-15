@@ -18,5 +18,5 @@ ansible-galaxy install -r requirements.yml
 ## Run the playbook
 
 ```bash
-ansible-playbook -i ../inventory/prod playbook.yml
+ansible-playbook -i ../inventory playbook.yml
 ```

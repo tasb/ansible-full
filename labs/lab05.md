@@ -25,10 +25,7 @@
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab05` inside `ansible-labs`
-- [ ] Navigate to `lab05` folder
-- [ ] Copy the `inventory` folder from `lab04` to `lab05`
-  - Command: `cp -r ../lab04/inventory ./inventory`
+- [ ] Navigate to `ansible` folder inside your home folder on control node
 
 ## Guide
 

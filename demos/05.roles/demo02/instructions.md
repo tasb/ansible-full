@@ -20,7 +20,7 @@ index
 - Uncomment the role on the playbook
 
 ```bash
-ansible-playbook -i ../inventory/dev playbook.yml
+ansible-playbook -i ../inventory playbook.yml
 ```
 
 - Explain that you don't need to specify the roles path because it's a default path
@@ -28,7 +28,7 @@ ansible-playbook -i ../inventory/dev playbook.yml
 ## Run again using the var for local index.html
 
 ```bash
-ansible-playbook -i ../inventory/dev playbook.yml
+ansible-playbook -i ../inventory playbook.yml
 ```
 
 - Check the output with different HTML
