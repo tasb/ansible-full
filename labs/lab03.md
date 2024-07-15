@@ -218,13 +218,17 @@ The playbook file context at the end should look like this:
   hosts: webserver
   become: true
   tasks:
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 86400
     - name: Install Apache
       ansible.builtin.apt:
-        name: httpd
+        name: apache2
         state: latest
     - name: Start Apache
       ansible.builtin.service:
-        name: httpd
+        name: apache2
         state: started
     - name: Copy index.html
       ansible.builtin.copy:
