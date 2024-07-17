@@ -31,6 +31,7 @@ The slides used during the sessions are available on the `slides` folder.
 - [Lab 2 - YAML Inventory with Group and Host Variables in Ansible](labs/lab02.md)
 - [Lab 3 - Playbooks](labs/lab03.md)
 - [Lab 4 - Deep Dive into Playbooks](labs/lab04.md)
+- [Lab 5 - Author your first Ansible Role](labs/lab05.md)
 
 ## Feedback
 

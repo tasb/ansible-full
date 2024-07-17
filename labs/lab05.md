@@ -269,17 +269,17 @@ The file should have the following content:
 ```yaml
 ---
 - name: Manage users and groups
-  hosts: db
+  hosts: all
   become: true
   roles:
     - role: lab.usersandgroups
-      when: ansible_os_family == "RedHat"
+      when: ansible_os_family == "Ubuntu"
   vars:
     users_list:
       - name: adminuser
         state: present
         password: "{{ 'password123' | password_hash('sha512') }}"
-        groups: ["wheel"]
+        groups: ["sudo"]
         createhome: yes
         generate_ssh_key: true
         shell: "/bin/bash"
@@ -320,7 +320,7 @@ The file should have the following content:
 
 On this playbook you use your role for creating 2 groups and 3 users.
 
-Pay attention on the `when` directive on the role definition, this is a conditional statement that will only run the role if the `ansible_os_family` is `RedHat`.
+Pay attention on the `when` directive on the role definition, this is a conditional statement that will only run the role if the `ansible_os_family` is `Ubuntu`.
 
 ## Step 07: Run the playbook
 
