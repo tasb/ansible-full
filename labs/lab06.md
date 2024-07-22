@@ -24,10 +24,7 @@
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab06` inside `ansible-labs`
-- [ ] Navigate to `lab06` folder
-- [ ] Copy the `inventory` folder from `lab05` to `lab06`
-  - Command: `cp -r ../lab05/inventory ./inventory`
+- [ ] Navigate to `ansible` folder inside your home folder on control node
 
 ## Guide
 
@@ -140,10 +137,12 @@ ansible-playbook -i inventory nginx.yml
 
 ### Step 08: Access the server
 
-Open a web browser and access the server using the following URL:
+On the control node, run the following `curl` commands to access the servers:
 
-- [http://servidor-0.seg-social.virt](http://servidor-0.seg-social.virt)
-- [http://servidor-1.seg-social.virt](http://servidor-1.seg-social.virt)
+```bash
+curl http://<server-1-private-ip>
+curl http://<server-2-private-ip>
+```
 
 You should see the `index.html` file created using the Jinja2 template.
 
