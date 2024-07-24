@@ -33,6 +33,8 @@ The slides used during the sessions are available on the `slides` folder.
 - [Lab 4 - Deep Dive into Playbooks](labs/lab04.md)
 - [Lab 5 - Author your first Ansible Role](labs/lab05.md)
 - [Lab 6 - Using Templates with Jinja2](labs/lab06.md)
+- [Lab 7 - Using Ansible Vault and create a complex scenario](labs/lab07.md)
+- [Lab 8 - Manage Windows hosts with Ansible](labs/lab08.md)
 
 ## Feedback
 

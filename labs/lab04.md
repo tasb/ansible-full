@@ -52,6 +52,7 @@ Add the following content to the file:
       ansible.builtin.apt:
         name: redis-server
         state: present
+        update_cache: true
       when: ansible_facts['os_family'] == "Debian"
       notify:
         - Start Redis
@@ -144,10 +145,6 @@ Edit the file `full_playbook.yml` and change the `Install Redis` task to the fol
 ```
 
 Pay attention to the indentation. The `changed_when` option should be at the same level as the `register` option.
-
-On this task, you are using the `changed_when` option to change the result of the task to `Changed` when the `rc` attribute of the `redis_installed` variable is `0`.
-
-The `rc` attribute is the return code of the task. When the task runs without any error, the return code is `0`.
 
 Let's run the playbook again:
 
@@ -422,7 +419,7 @@ After you added all the tasks, your `full_playbook.yml` should look like this:
         state: present
       when: ansible_facts['os_family'] == "RedHat"
       register: redis_installed
-      changed_when: redis_installed.rc == 0
+      changed_when: true
       notify:
         - Start Redis
 
@@ -430,9 +427,10 @@ After you added all the tasks, your `full_playbook.yml` should look like this:
       ansible.builtin.apt:
         name: redis-server
         state: present
+        update_cache: true
       when: ansible_facts['os_family'] == "Debian"
       register: redis_installed
-      changed_when: redis_installed.rc == 0
+      changed_when: true
       notify:
         - Start Redis
 

@@ -85,20 +85,20 @@ Update the `tasks/main.yml` file removing all content and to include the followi
 ```yaml
 ---
 - name: Install nginx
-  package:
+  ansible.builtin.package:
     name: nginx
     state: present
 
 - name: Start nginx
-  service:
+  ansible.builtin.service:
     name: nginx
     state: started
     enabled: yes
 
 - name: Create index.html
-  template:
+  ansible.builtin.template:
     src: "{{ template_file }}"
-    dest: /usr/share/nginx/html/index.html
+    dest: /var/www/html/index.html
   notify: Restart nginx
 ```
 
@@ -109,7 +109,7 @@ Update the `handlers/main.yml` file removing all content and to include the foll
 ```yaml
 ---
 - name: Restart nginx
-  service:
+  ansible.builtin.service:
     name: nginx
     state: restarted
 ```

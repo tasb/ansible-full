@@ -19,10 +19,7 @@
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab07` inside `ansible-labs`
-- [ ] Navigate to `lab07` folder
-- [ ] Copy all content from `lab04` fodler to `lab07` folder
-  - Command: `cp -r ../lab04/* .`
+- [ ] Navigate to `ansible` folder inside your home folder on control node
 
 ## Guide
 
@@ -53,10 +50,10 @@ Your playbook should look like this:
 Run the playbook to make sure everything is working as expected, using the following command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory full_playbook.yml
 ```
 
-In case you get an error starting Apache `httpd` service, create a file named `clean-nginx.yml` with the following content:
+In case you get an error starting Apache `apache2` service, create a file named `clean-nginx.yml` with the following content:
 
 ```yaml
 ---
@@ -65,12 +62,12 @@ In case you get an error starting Apache `httpd` service, create a file named `c
   become: yes
   tasks:
   - name: Stop nginx
-    service:
+    ansible.builtin.service:
       name: nginx
       state: stopped
  
   - name: Remove nginx
-    package:
+    ansible.builtin.package:
       name: nginx
       state: absent
 ```
@@ -78,13 +75,13 @@ In case you get an error starting Apache `httpd` service, create a file named `c
 Execute the playbook using the following command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml clean-nginx.yml
+ansible-playbook -i inventory clean-nginx.yml
 ```
 
 Then, execute the `full_playbook.yml` again, using the following command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory full_playbook.yml
 ```
 
 ### Step 02: Use template for `redis.conf`
@@ -104,7 +101,7 @@ On the `lab.redis` role, you should have a task with the following content:
 
 This is a great opportunity to use a template instead of regex replace.
 
-Create a template file named `redis.conf.j2` inside `templates` folder with the content of this file: [redis.conf](https://raw.githubusercontent.com/tasb/ansible-training/main/labs/lab07/redis.conf).
+Create a template file named `redis.conf.j2` inside `templates` folder with the content of this file: [redis.conf](lab07/redis.conf).
 
 Find the line with the `# requirepass foobared` and replace it with `requirepass {{ redis_password }}`.
 
@@ -124,7 +121,7 @@ After doing this, the task should look like this:
 Run the playbook to make sure everything is working as expected, using the following command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml
+ansible-playbook -i inventory full_playbook.yml
 ```
 
 ### Step 03: Use Ansible Vault to encrypt sensitive data
@@ -182,7 +179,7 @@ After doing this, your playbook should look like this:
 Run the playbook using the following command:
 
 ```bash
-ansible-playbook -i inventory/inventory.yml full_playbook.yml --ask-vault-pass
+ansible-playbook -i inventory full_playbook.yml --ask-vault-pass
 ```
 
 You need to enter the password you've set to encrypt the variable.
