@@ -1,11 +1,9 @@
 - name: Using vaults
-  hosts: rocky
-  gather_facts: no
+  hosts: localhost
+  gather_facts: false
   vars:
-    bd_pass: 
+    bd_pass: password
   tasks:
     - name: Display secret password from the first vault
-      debug:
+      ansible.builtin.debug:
         var: bd_pass
-
-

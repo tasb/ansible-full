@@ -11,7 +11,7 @@ ansible-vault encrypt_string 'dev_password' --name 'bd_pass'
 ## Run Playbook
 
 ```bash
-ansible-playbook -i inventory vault-var.yml --ask-vault-pass
+ansible-playbook -i ../inventory/hosts.yml vault-var.yml --ask-vault-pass
 ```
 
 ## Encrypt File
@@ -43,5 +43,5 @@ echo "password" > vault_pass.txt
 ```
 
 ```bash
-ansible-playbook vault.yml --vault-password-file vault_pass.txt
+ansible-playbook -i ../inventory/hosts.yml vault-file.yml --vault-password-file vault_pass.txt
 ```

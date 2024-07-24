@@ -1,0 +1,35 @@
+---
+- name: Using vaults ID and files
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Copy encrypted file
+      ansible.builtin.copy:
+        src: api-key.txt
+        dest: /tmp/api-key.txt
+        mode: '0644'
+
+    - name: Display file contents
+      ansible.builtin.command: cat /tmp/api-key.txt
+      register: command_output
+      changed_when: false
+
+    - name: Print to console
+      ansible.builtin.debug:
+        msg: "{{ command_output.stdout }}"
+
+- name: Using vaults ID and vars
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bd_pass: !vault |
+          $ANSIBLE_VAULT;1.2;AES256;vault2
+          63336533653730393737393066656261616261376338373230626363396437636533343233363066
+          3061356639616338363761386562646665303065623633350a323664646366333930366364326532
+          39333632363261336166366135386634323265386237383136616634303436343132346539313037
+          6537333831353734640a633334633166646464623335646266323130363939363163653162653835
+          3465
+  tasks:
+    - name: Show secret from vault2
+      ansible.builtin.debug:
+        msg: "Secret from vault2: {{ bd_pass }}"

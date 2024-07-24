@@ -1,18 +1,18 @@
 - name: Using vaults
-  hosts: rocky
-  gather_facts: no
+  hosts: localhost
+  gather_facts: false
   tasks:
     - name: Copy encrypted file
       ansible.builtin.copy:
         src: confidential_data.txt
         dest: /tmp/confidential_data.txt
+        mode: '0644'
 
     - name: Display file contents
       ansible.builtin.command: cat /tmp/confidential_data.txt
       register: command_output
+      changed_when: false
 
     - name: Print to console
       ansible.builtin.debug:
-        msg: "{{command_output.stdout}}"
-
-
+        msg: "{{ command_output.stdout }}"
