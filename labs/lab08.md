@@ -6,11 +6,12 @@
 - [Prerequisites](#prerequisites)
 - [Guide](#guide)
   - [Step 01: Prepare Control Node](#step-01-prepare-control-node)
-  - [Step 03: Create a Windows VM](#step-03-create-a-windows-vm)
-  - [Step 04: Confirm your Windows host have WinRM enabled](#step-04-confirm-your-windows-host-have-winrm-enabled)
-  - [Step 05: Create a new inventory file](#step-05-create-a-new-inventory-file)
-  - [Step 06: Test your connection](#step-06-test-your-connection)
-  - [Step 07: Create a playbook](#step-07-create-a-playbook)
+  - [Step 02: Create a Windows VM](#step-02-create-a-windows-vm)
+  - [Step 03: Confirm your Windows host have WinRM enabled](#step-03-confirm-your-windows-host-have-winrm-enabled)
+  - [Step 04: Create a new inventory file](#step-04-create-a-new-inventory-file)
+  - [Step 05: Test your connection](#step-05-test-your-connection)
+  - [Step 06: Create a playbook](#step-06-create-a-playbook)
+  - [Step 07: Configure IIS](#step-07-configure-iis)
 - [Conclusion](#conclusion)
 
 ## Objectives
@@ -20,14 +21,13 @@
 
 ## Prerequisites
 
-- [ ] Create a folder named `lab09` inside `ansible-labs` on your home directory
-- [ ] Navigate to `lab09` folder
+- [ ] Navigate to `ansible` folder inside your home folder on control node
 
 ## Guide
 
 ### Step 01: Prepare Control Node
 
-Before you start, you need to install the following packages:
+Before you start, you need to install the following packages on your control node:
 
 ```bash
 sudo apt update
@@ -35,17 +35,32 @@ sudo apt install -y python3-pip
 pip install "pywinrm>=0.3.0"
 ```
 
-### Step 03: Create a Windows VM
+### Step 02: Create a Windows VM
 
-You can create a Windows VM on your local machine or you can align your efforts with your final project group members and create a Windows VM on the cloud.
+Create a Windows VM on Azure, with the following details:
 
-After creating the VM, make sure you can access it from your control node and you get the following information:
+- **Resource Group**: `<your-prefix>-ansible-lab`
+- **Region**: `West Europe`
+- **Virtual Machine Name**: `<your-prefix>-windows-node`
+- **Availability options**: `No infrastructure redundancy required`
+- **Image**: `Windows Server 2019 Datacenter - x64 Gen2`
+- **Size**: `Standard_D4s_v3`
+- **Username**: `azureuser`
+- **Password**: Select a password that will remeber after :)
 
-- IP Address
+You need to go to the `Networking` tab and select the previously create virtual network. This will ensure that all virtual machines are in the same network.
+
+On the dropdown, you need to select the virtual network that starts with `<your-prefix>`.
+
+In this case, you need to enable the public IP since you need to use RDP to access the VM to check if WinRM is enabled.
+  
+After creating the VM, make sure you keep this information:
+
+- Private and public IP Address
 - Username
 - Password
 
-### Step 04: Confirm your Windows host have WinRM enabled
+### Step 03: Confirm your Windows host have WinRM enabled
 
 You can confirm if your Windows host has WinRM enabled by running the following command on your Windows host:
 
@@ -67,20 +82,22 @@ Listener
     ListeningOn = xxxxxxxxx
 ```
 
-Don't forget to open the port 5985 to be reachable from your control node. On Azure, you may need to open it on network security group.
+Check if on the list od IPs on `ListeningOn` you have the private IP of your Windows host.
 
-## Step 05: Create a new inventory file
+You don't need to open the port 5985 on the Windows host, since the connection will be made through the Azure network.
 
-Create a new inventory file named `inventory.yml` with the following content:
+## Step 04: Create a new inventory file
+
+Create a new inventory file named `windows.yml` on the `inventory` folder with the following content:
 
 ```yaml
 windows:
   hosts:
     windows-server:
-      ansible_host: <WINDOWS_IP>
+      ansible_host: <WINDOWS_PRIVATE_IP>
 ```
 
-Then create a new file named `group_vars/windows.yml` with the following content:
+Then create a new file named `inventory/group_vars/windows.yml` with the following content:
 
 ```yaml
 ansible_port: 5985
@@ -91,13 +108,15 @@ ansible_winrm_transport: ntlm
 ansible_winrm_scheme: http
 ```
 
-## Step 06: Test your connection
+## Step 05: Test your connection
 
 Run the following command to test your connection:
 
 ```bash
-ansible windows -i inventory.yml -m win_ping -k
+ansible -i inventory/windows.yml windows -m ansible.windows.win_ping -k
 ```
+
+The `-k` flag will ask for your password.
 
 You need to enter your user password to be able to connect to the Windows host.
 
@@ -110,14 +129,14 @@ You should see an output similar to this:
 }
 ```
 
-### Step 07: Create a playbook
+### Step 06: Create a playbook
 
 Create a playbook named `notepad.yml` with the following content:
 
 ```yaml
 ---
 - name: Installing Notepad ++
-  hosts: server
+  hosts: windows
   gather_facts: true
   tasks:
   - name: Download the Notepad++ installer
@@ -132,7 +151,48 @@ Create a playbook named `notepad.yml` with the following content:
         state: present
 ```
 
-Now, find the appropriate command to run the playbook.
+Now, let's run the playbook with the following command:
+
+```bash
+ansible-playbook -i inventory/windows.yml notepad.yml -k
+```
+
+You need to enter your user password to be able to connect to the Windows host.
+
+### Step 07: Configure IIS
+
+Create a playbook named `iis.yml` with the following content:
+
+```yaml
+- name: Installing IIS
+  hosts: windows
+  gather_facts: false
+  tasks:
+    - name: Install IIS Web-Server with sub features and management tools
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+        include_sub_features: true
+        include_management_tools: true
+      register: iis_install
+      notify: Reboot
+
+  handlers:
+    - name: Reboot when Web-Server feature requires it
+      ansible.windows.win_reboot:
+      when: iis_install.reboot_required
+      listen: Reboot
+```
+
+Check the handler `Reboot` that will be called when the `Web-Server` feature requires a reboot, using the output of the `win_feature` module.
+
+Now run the playbook with the following command:
+
+```bash
+ansible-playbook -i inventory/windows.yml iis.yml -k
+```
+
+You need to enter your user password to be able to connect to the Windows host.
 
 ## Conclusion
 

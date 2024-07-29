@@ -1,6 +1,6 @@
 ---
 - name: Installing IIS
-  hosts: server
+  hosts: windows
   gather_facts: false
   tasks:
     - name: Install IIS Web-Server with sub features and management tools

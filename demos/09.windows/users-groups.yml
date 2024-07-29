@@ -1,6 +1,6 @@
 ---
 - name: Installing Notepad ++
-  hosts: server
+  hosts: windows
   gather_facts: true
   vars:
     user_pass: !vault |
