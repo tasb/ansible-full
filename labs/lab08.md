@@ -84,6 +84,18 @@ Listener
 
 Check if on the list od IPs on `ListeningOn` you have the private IP of your Windows host.
 
+Then you need to ensure that `Basic Authentication` is enabled on WinRM. You can do this by running the following command:
+
+```powershell
+Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+```
+
+And finally, allow unencrypted traffic by running the following command:
+
+```powershell
+Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+```
+
 You don't need to open the port 5985 on the Windows host, since the connection will be made through the Azure network.
 
 ## Step 04: Create a new inventory file
@@ -148,7 +160,6 @@ Create a playbook named `notepad.yml` with the following content:
     ansible.windows.win_package: 
         path: C:\npp.7.9.1.Installer.x64.exe
         arguments: /S
-        state: present
 ```
 
 Now, let's run the playbook with the following command:
@@ -164,6 +175,7 @@ You need to enter your user password to be able to connect to the Windows host.
 Create a playbook named `iis.yml` with the following content:
 
 ```yaml
+---
 - name: Installing IIS
   hosts: windows
   gather_facts: false
@@ -182,6 +194,7 @@ Create a playbook named `iis.yml` with the following content:
       ansible.windows.win_reboot:
       when: iis_install.reboot_required
       listen: Reboot
+
 ```
 
 Check the handler `Reboot` that will be called when the `Web-Server` feature requires a reboot, using the output of the `win_feature` module.

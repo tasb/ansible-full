@@ -1,8 +1,9 @@
 ---
-- name: Installing Notepad ++
+- name: CManage users and groups
   hosts: windows
   gather_facts: true
   vars:
+    username: MyNewUser
     user_pass: !vault |
                 $ANSIBLE_VAULT;1.1;AES256
                 37666536333766313433383530366163326433373935383934356332666164653233333936336566
@@ -11,17 +12,17 @@
                 6232303435326237320a613364346230626566616663663762616663303233336535356561643538
                 3035
   tasks:
-  - name: Ensure user bob is present
-    ansible.windows.win_user:
-      name: NewRemoteUser
-      password: "{{ user_pass }}"
-      state: present
-      groups:
-        - Users
+    - name: Ensure user presence - {{ username }}
+      ansible.windows.win_user:
+        name: "{{ username }}"
+        password: "{{ user_pass }}"
+        state: present
+        groups:
+          - Users
 
-  - name: Add a local and domain user to a local group
-    ansible.windows.win_group_membership:
-      name: Remote Desktop Users
-      members:
-        - NewRemoteUser
-      state: present
+    - name: Add a local and domain user to a local group
+      ansible.windows.win_group_membership:
+        name: Remote Desktop Users
+        members:
+          - "{{ username }}"
+        state: present

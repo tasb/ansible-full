@@ -1,15 +1,14 @@
 ---
 - name: Installing Notepad ++
-  hosts: server
+  hosts: windows
   gather_facts: true
   tasks:
-  - name: Download the Notepad++ installer
-    ansible.windows.win_get_url:
+    - name: Download the Notepad++ installer
+      ansible.windows.win_get_url:
         url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.1/npp.7.9.1.Installer.x64.exe
         dest: C:\npp.7.9.1.Installer.x64.exe
 
-  - name: Execute Installer
-    ansible.windows.win_package: 
+    - name: Execute Installer
+      ansible.windows.win_package:
         path: C:\npp.7.9.1.Installer.x64.exe
         arguments: /S
-        state: present
