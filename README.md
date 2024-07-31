@@ -24,6 +24,7 @@ The slides used during the sessions are available on the `slides` folder.
 - [Error Handling](slides/08.ErrorHandling.pdf)
 - [Ansible Vault](slides/09.Vault.pdf)
 - [Ansible In Windows](slides/10.Windows.pdf)
+- [Delegation in Ansible](slides/11.Delegation.pdf)
 
 ## Labs
 
